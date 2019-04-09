@@ -1,0 +1,304 @@
+---
+title: "Sundhar`s Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    social: [ "twitter", "facebook", "menu"]
+    source_code: embed
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(knitr)
+library(DT)
+library(rpivotTable)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(openintro)
+library(highcharter)
+library(ggvis)
+```
+
+
+```{r}
+data3 <- read.csv("DoMS_2.5.2.csv")
+```
+
+```{r}
+mycolors <- c("blue", "#FFC125", "red", "darkorange")
+```
+
+Interactive Data Visualization
+=====================================
+
+Row
+-------------------------------------
+
+### Railways Accident Analysis
+
+```{r}
+valueBox(paste("Indian "),
+         color = "danger")
+```
+
+### Total Railway Accidents(2002-2017)
+
+```{r}
+valueBox(114,
+         icon = "train")
+```
+
+### **Total Railway Accidents**
+
+```{r}
+gauge(114,
+            min = 0,
+            max = 140,
+            gaugeSectors(success = c(0, 20),
+                         warning = c(20,50),
+                         danger = c(50,140),
+                         colors = c("green", "yellow", "red")))
+```
+
+### **Total Accidents in winter**
+
+```{r}
+gauge(39,
+            min = 0,
+            max = 40,
+            gaugeSectors(success = c(0, 10),
+                         warning = c(10,30),
+                         danger = c(30,40),
+                         colors = c("green", "yellow", "red")))
+```
+
+### **Total Accidents in summer**
+
+```{r}
+gauge(29,
+            min = 0,
+            max = 40,
+            gaugeSectors(success = c(0, 10),
+                         warning = c(10,30),
+                         danger = c(30,40),
+                         colors = c("green", "yellow", "red")))
+```
+
+### **Total Accidents in monsoon**
+
+```{r}
+gauge(27,
+            min = 0,
+            max = 40,
+            gaugeSectors(success = c(0, 10),
+                         warning = c(10,30),
+                         danger = c(30,40),
+                         colors = c("green", "yellow", "red")))
+```
+
+### **Total Accidents in autumn**
+
+```{r}
+gauge(18,
+            min = 0,
+            max = 40,
+            gaugeSectors(success = c(0, 20),
+                         warning = c(20,30),
+                         danger = c(30,40),
+                         colors = c("blue", "yellow", "red")))
+```
+
+Row
+-------------------------------
+
+### Accidents by Division
+
+```{r}
+p1 <- plot_ly(x = c("n","nc","s","c","sc","ne","e","sw","ec","wc","nef","eco","k","w","se","nw"),
+                 y = c(23,15,12,10,10,8,7,6,6,5,5,4,4,2,2,1),
+                 color = "orange",
+                 type = 'bar') %>%
+layout(xaxis = list(title = "Railway division"),
+yaxis = list(title = 'Number of Accidents'))
+p1
+```
+
+### Number of Accidents by region
+
+```{r}
+p2 <- plot_ly(labels = c("North","South","East","Central","west"),
+                 values = c(52,28,15,10,9),
+                 marker = list(colors = mycolors)) %>%
+         add_pie(hole = 0.2) %>%
+         layout(xaxis = list(zeroline = F,
+                             showline = F,
+                             showticklabels = F,
+                             showgrid = F),
+                yaxis = list(zeroline = F,
+                             showline = F,
+                             showticklabels=F,
+                             showgrid=F))
+p2
+```
+
+### Environment of Accident Spot vs Accident count 
+
+```{r}
+p3 <- plot_ly(x = c("open","busy","parallel_tracks","natural","station","water","bad_track","trees","others","loop_line"),
+              y = c(42,31,17,5,5,4,32,2,1,1),
+                type = "bar") %>%
+         layout(xaxis = list(title="Environment of Accident spot"),
+                yaxis = list(title = "Accident count"))
+p3
+```
+
+Row
+------------------------------------
+### Line Plot of Time vs Accident count
+
+```{r}
+p4<-plot_ly(x = c("[0,6]","[12,18]","[18,24]","[6,12]"), y = c(48,27,26,15), type = 'scatter', mode = 'lines')%>%
+  layout(
+         xaxis = list(title = "Time"),
+         yaxis = list (title = "Accident count"))
+
+p4
+```
+
+### Pie chart of train types vs accidents
+
+```{r}
+p5 <- plot_ly(labels = c("Express","Others","Passenger","Freight","Mail"),
+                 values = c(75,12,12,10,5),
+                 marker = list(colors = mycolors)) %>%
+         add_pie(hole = 0.2) %>%
+         layout(xaxis = list(zeroline = F,
+                             showline = F,
+                             showticklabels = F,
+                             showgrid = F),
+                yaxis = list(zeroline = F,
+                             showline = F,
+                             showticklabels=F,
+                             showgrid=F))
+p5
+```
+
+Major Cause
+========================================
+
+### cause
+
+```{r}
+a2 <- plot_ly(labels = c("Human_error","Unknown","Technical","Attack","Natural","Unclear _track","Fire"),
+                 values = c(33,20,17,15,11,11,8),
+                 marker = list(colors = mycolors)) %>%
+         add_pie(hole = 0.2) 
+         
+a2
+```
+
+Data Table
+========================================
+
+```{r}
+datatable(data3,
+          caption = "Indian Railway Accidents",
+          rownames = T,
+          filter = "top",
+          options = list(pageLength = 25))
+```
+
+Pivot Table
+=========================================
+
+```{r}
+rpivotTable(data3,
+            aggregatorName = "Count",
+            cols= "killed",
+            rows = "railway_division",
+            rendererName = "Heatmap")
+```
+
+Summary {data-orientation=columns} 
+===========================================
+
+Column 
+-----------------------------------
+
+### Total number of people died
+
+```{r}
+valueBox(1781,
+         icon = "skull-crossbones" )
+```
+
+### Total Number of people injured
+```{r}
+valueBox(4902,
+         icon = "hospital")
+```
+
+### Average Railway Accidents per Year
+
+```{r}
+valueBox(8,
+         icon = "fa-area-chart")
+```
+
+Column
+---------------------------
+
+Report
+
+* 114 Trains have been damaged in accidents.
+
+* Most Number of Accidents happened in Winter Season.
+
+* Most Number of Accidents happened during 00.00 AM to 06:00 AM.
+
+This report was generated on `r format(Sys.Date(), format = "%B %d, %Y")`.
+
+About Report
+========================================
+
+Task Abstraction:-
+
+Q1. On which time of day more accidents are happening? Does visibility play a major role in accidents?
+
+Ans. Accidents are more during night time. Out of 114 observations, accidents in night time (49 + 25 = 74) are greater than that in daytime ( = 40). They can be prevented by avoid speeding at night time.
+
+Q2. In which season accidents are more frequent?
+
+Ans. Accidents are more frequent in winter season, followed by monsoon. The reason is climatic condition. Heavy rain in monsoon wets railway track, flash floods disrupt train route, dense fog affects movement of train
+
+Q3.  Which region of the country has experienced more accidents?
+
+Ans.  Northern region has experienced more accidents. This is due to high population density in northern states. As of 2011 Census of India, U.P. alone contributes to 16.5 % of nation's population. Higher population density means more number of railway tracks for accommodation.
+
+Q4. What is the environment of accident spot (like open area, flood affected area or bad track)?
+
+Ans. Open area includes tracks away from agricultural field and residential areas. Accidents are frequent in opens area because there is only one track and fast moving train collides before even changing track or slowing down
+
+Q5. Which type of trains suffer more accidents(express, passenger, freight, etc.)?
+
+Ans. Express trains suffer more accident because of speeding and signal overshooting. Derailment occurs when taking sharp turn at high speed. Many cases include binary collision of express train with other express/passenger train. Passenger train is usually running at low speed when collision takes place. It is the express train which rams into it
+
+
+Conclusion:-
+
+From the data of 16 years, it is clear that some causes can be prevented and some can't. Natural causes are very rare in causing accidents. Every year train accidents take place and exact cause of accident is not known in many cases. If the investigation of accidents are carried out in more depth then improvements can be made effectively. Accidents happening inside train, like fire, are less nowadays. Human negligence is major cause and will remain the cause in future if no special attention is given by train drivers, roadways riders, people crossing tracks, vehicles crossing tracks, etc.
+
+
+
+
+Done By:- Grandhe Venkata Guna Sundhar(17BCE2401)
+
+
+
+
+
+
+
+
